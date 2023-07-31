@@ -1,5 +1,7 @@
 import express from "express";
-import user from "./routes/auth.routes.js";
+import auth from "./routes/auth.routes.js";
+import profile from "./routes/profile.routes.js";
+import shop from "./routes/shop.routes.js";
 import product from "./routes/product.routes.js";
 import { authenticateToken }from "./middlewares/auth.middlewares.js";
 import { errorHandler } from "./middlewares/error.middlewares.js";
@@ -20,8 +22,12 @@ app.use(expressjwt({
 }));
 
 app.use(express.json());
-app.use("/", user);
+app.use("/", auth);
 app.use("/product", product);
+app.use("/profile", profile);
+app.use("/shop/profile", shop);
+app.use("/product", product);
+
 app.use(errorHandler);
 dotenv.config();
 

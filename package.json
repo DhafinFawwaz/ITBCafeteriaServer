@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec",
-    "seed": "node sql/seed.js"
+    "seed": "node sql/seed.js",
+    "regenerate": "node sql/regenerate.js"
   },
   "author": "",
   "license": "ISC",

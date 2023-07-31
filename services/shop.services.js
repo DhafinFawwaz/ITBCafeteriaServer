@@ -2,9 +2,9 @@ import bcrypt from "bcryptjs";
 import { generateAccessToken, authenticateToken } from "../middlewares/auth.middlewares.js";
 import { db } from "../sql/db.js";
 
-export async function loginUserService({email, password}, callback) {
-    const userQuery = await db.query(
-        "SELECT * FROM user WHERE email = ?",
+export async function loginShopService({email, password}, callback) {
+    const shopQuery = await db.query(
+        "SELECT * FROM shop WHERE email = ?",
         [email],
         (err, data) => {
             if (err) {
@@ -13,22 +13,22 @@ export async function loginUserService({email, password}, callback) {
         }
     );
 
-    if (!userQuery[0][0]) {
-        return callback("User not found");
+    if (!shopQuery[0][0]) {
+        return callback("Shop not found");
     }
-    const user = userQuery[0][0];
+    const shop = shopQuery[0][0];
 
-    const validPassword = await bcrypt.compare(password, user.password);
+    const validPassword = await bcrypt.compare(password, shop.password);
     if (!validPassword) {
         return callback("Password is not correct");
     }
 
-    const token = generateAccessToken(user.email);
-    return callback(null, { ...user, token });
+    const token = generateAccessToken(shop.email);
+    return callback(null, { ...shop, token });
     
 }
 
-export async function registerUserService(params, callback) {
+export async function registerShopService(params, callback) {
     if(params.username === undefined) {
         return callback({ message: "Username is required"});
     }
@@ -38,9 +38,12 @@ export async function registerUserService(params, callback) {
     if(params.email === undefined) {
         return callback({ message: "Email is required"});
     }
+    if(params.telephone === undefined) {
+        return callback({ message: "Telephone is required"});
+    }
 
-    const userQuery = await db.query(
-        "SELECT * FROM user WHERE email = ?",
+    const shopQuery = await db.query(
+        "SELECT * FROM shop WHERE email = ?",
         [params.email],
         (err, data) => {
             if (err) {
@@ -49,7 +52,7 @@ export async function registerUserService(params, callback) {
         }
     );
 
-    if (userQuery[0][0]) {
+    if (shopQuery[0][0]) {
         return callback({ message: "email is already taken"});
     }
 
@@ -57,8 +60,8 @@ export async function registerUserService(params, callback) {
     const hashedPassword = await bcrypt.hash(params.password, salt);
 
     const newUser = await db.query(
-        "INSERT INTO user (username, password, email, telephone, image, created_at, modified_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        [params.username, hashedPassword, params.email, "", "", new Date(), new Date()],
+        "INSERT INTO shop (username, password, description, email, telephone, image, created_at, modified_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [params.username, hashedPassword, "", params.email, params.telephone, "", new Date(), new Date()],
         (err, data) => {
             console.log(data);
             if (err) {
@@ -72,6 +75,7 @@ export async function registerUserService(params, callback) {
         username: params.username,
         password: params.password,
         email: params.email,
+        telephone: params.telephone,
     });
 
 }
