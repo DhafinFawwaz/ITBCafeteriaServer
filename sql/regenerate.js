@@ -1,5 +1,12 @@
 import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
+import { 
+	createCartStatusTable, dropCartStatusTable,
+	createLocationTable, dropLocationTable,
+	createCategoryTable, dropCategoryTable,
+	createPaymentStatusTable, dropPaymentStatusTable,
+	createPaymentMethodTable, dropPaymentMethodTable,
+} from './sql.js';
 
 dotenv.config();
 // const db = await mysql.createConnection(process.env.DATABASE_URL);
@@ -16,6 +23,8 @@ async function loadAndSaveData() {
 		//clear the existing records
         console.log('regenerating all static database values...');
 
+        await db.query(dropLocationTable);
+		await db.query(createLocationTable)
 		await db.query(
 			"INSERT INTO location (name, description, created_at, modified_at, deleted_at) VALUES ?", 
 			[[
@@ -28,6 +37,8 @@ async function loadAndSaveData() {
 		});
         console.log('***regenerated location***');
 
+		await db.query(dropCategoryTable);
+		await db.query(createCategoryTable);
 		await db.query(
 			"INSERT INTO category (name, description, created_at, modified_at, deleted_at) VALUES ?", 
 			[[
@@ -41,6 +52,8 @@ async function loadAndSaveData() {
 		});
         console.log('***regenerated category***');
 
+		await db.query(dropPaymentMethodTable);
+		await db.query(createPaymentMethodTable);
 		await db.query(
 			"INSERT INTO payment_method (name, description, created_at, modified_at, deleted_at) VALUES ?", 
 			[[
@@ -53,10 +66,13 @@ async function loadAndSaveData() {
 		});
         console.log('***regenerated payment_method***');
 
+		await db.query(dropCartStatusTable);
+		await db.query(createCartStatusTable);
 		await db.query(
 			"INSERT INTO cart_status (name, description, created_at, modified_at, deleted_at) VALUES ?", 
 			[[
-				['In Progress', 'Pesanan sedang dibuat, mohon ditunggu.', new Date(), new Date(), null],
+				['On Hold', 'Pesanan masih dalam keranjang.', new Date(), new Date(), null],
+				['In Progress', 'Pesanan sedang dibuat, mohon ditunggu', new Date(), new Date(), null],
 				['Finished', 'Pesanan telah selesai. Silahkan diambil', new Date(), new Date(), null],
 			]], 
 			(err) => {
@@ -65,6 +81,8 @@ async function loadAndSaveData() {
 		});
         console.log('***regenerated cart_status***');
 
+		await db.query(dropPaymentStatusTable);
+		await db.query(createPaymentStatusTable);
 		await db.query(
 			"INSERT INTO payment_status (name, description, created_at, modified_at, deleted_at) VALUES ?", 
 			[[

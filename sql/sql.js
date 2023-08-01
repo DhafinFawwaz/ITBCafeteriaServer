@@ -17,9 +17,9 @@ export const createCartTable = `CREATE TABLE cart(
     payment_method_id TINYINT NOT NULL,
     payment_status_id TINYINT NOT NULL,
     cart_status_id TINYINT NOT NULL,
-    quantity INT NOT NULL,
-    pickup_date DATETIME NOT NULL,
-    total_price INT NOT NULL,
+    pickup_at DATETIME NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL,
+    note VARCHAR(1023) NOT NULL,
     created_at DATETIME NOT NULL,
     modified_at DATETIME NOT NULL
 )`;
@@ -97,7 +97,6 @@ export const createOrderItemTable = `CREATE TABLE order_item(
     product_id INT NOT NULL,
     cart_id INT NOT NULL,
     quantity INT NOT NULL,
-    note VARCHAR(255) NOT NULL,
     created_at DATETIME NOT NULL,
     modified_at DATETIME NOT NULL
 )`;
