@@ -174,6 +174,6 @@ export async function deleteOrder(req, res) {
 
     res.status(200).json({
         message: "success",
-        data: req.body
+        data: req.query
     });
 }

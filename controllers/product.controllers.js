@@ -21,7 +21,99 @@ export async function addProduct(req, res) {
 }
 
 export async function findProduct(req, res) {
+    // cases: location_id, category_id, name
 
+    const byLocation = req.query.location_id > 0 && req.query.location_id !== undefined && req.query.location_id !== null;
+    const byCategory = req.query.category_id > 0 && req.query.category_id !== undefined && req.query.category_id !== null;
+    const byName = req.query.name !== "" && req.query.name !== undefined && req.query.name !== null;
+    const limit = 16;
+
+    let findProductQuery;
+
+    if(byLocation && byCategory && byName) {
+        findProductQuery = await db.query(
+            `SELECT * FROM product WHERE location_id = ? AND category_id = ? AND name LIKE ? LIMIT ?`,
+            [req.query.location_id, req.query.category_id, `%${req.query.name}%`, limit],
+            (error, result) => {
+                if(error) {
+                    console.log(error);
+                    return next(error.message);
+                }
+            }
+        );
+    } else if(byLocation && byCategory) {
+        findProductQuery = await db.query(
+            `SELECT * FROM product WHERE location_id = ? AND category_id = ? LIMIT ?`,
+            [req.query.location_id, req.query.category_id, limit],
+            (error, result) => {
+                if(error) {
+                    console.log(error);
+                    return next(error.message);
+                }
+            }
+        );
+    } else if(byLocation && byName) {
+        findProductQuery = await db.query(
+            `SELECT * FROM product WHERE location_id = ? AND name LIKE ? LIMIT ?`,
+            [req.query.location_id, `%${req.query.name}%`, limit],
+            (error, result) => {
+                if(error) {
+                    console.log(error);
+                    return next(error.message);
+                }
+            }
+        );
+    } else if(byCategory && byName) {
+        findProductQuery = await db.query(
+            `SELECT * FROM product WHERE category_id = ? AND name LIKE ? LIMIT ?`,
+            [req.query.category_id, `%${req.query.name}%`, limit],
+            (error, result) => {
+                if(error) {
+                    console.log(error);
+                    return next(error.message);
+                }
+            }
+        );
+    } else if(byLocation) {
+        findProductQuery = await db.query(
+            `SELECT * FROM product WHERE location_id = ? LIMIT ?`,
+            [req.query.location_id, limit],
+            (error, result) => {
+                if(error) {
+                    console.log(error);
+                    return next(error.message);
+                }
+            }
+        );
+    }
+    else if(byCategory) {
+        findProductQuery = await db.query(
+            `SELECT * FROM product WHERE category_id = ? LIMIT ?`,
+            [req.query.category_id, limit],
+            (error, result) => {
+                if(error) {
+                    console.log(error);
+                    return next(error.message);
+                }
+            }
+        );
+    } else if(byName) {
+        findProductQuery = await db.query(
+            `SELECT * FROM product WHERE name LIKE ?`,
+            [`%${req.query.name}%`],
+            (error, result) => {
+                if(error) {
+                    console.log(error);
+                    return next(error.message);
+                }
+            }
+        );
+    }
+
+    res.status(200).json({
+        message: "success",
+        data: findProductQuery[0]
+    });
 
 }
 
