@@ -14,7 +14,7 @@ const db = await mysql.createConnection({
 async function loadAndSaveData() {
 	try {
 		//clear the existing records
-        console.log('generating all static database values...');
+        console.log('regenerating all static database values...');
 
 		await db.query(
 			"INSERT INTO location (name, description, created_at, modified_at, deleted_at) VALUES ?", 
@@ -52,6 +52,30 @@ async function loadAndSaveData() {
 			conn.end();
 		});
         console.log('***regenerated payment_method***');
+
+		await db.query(
+			"INSERT INTO cart_status (name, description, created_at, modified_at, deleted_at) VALUES ?", 
+			[[
+				['In Progress', 'Pesanan sedang dibuat, mohon ditunggu.', new Date(), new Date(), null],
+				['Finished', 'Pesanan telah selesai. Silahkan diambil', new Date(), new Date(), null],
+			]], 
+			(err) => {
+			if (err) throw err;
+			conn.end();
+		});
+        console.log('***regenerated cart_status***');
+
+		await db.query(
+			"INSERT INTO payment_status (name, description, created_at, modified_at, deleted_at) VALUES ?", 
+			[[
+				['Not paid', 'Pesanan belum dibayar.', new Date(), new Date(), null],
+				['Paid', 'Pesanan telah dibayar', new Date(), new Date(), null],
+			]], 
+			(err) => {
+			if (err) throw err;
+			conn.end();
+		});
+        console.log('***regenerated payment_status***');
 		
         console.log('');
         console.log('All static database values regenerated successfully...\n');
