@@ -1,6 +1,7 @@
 import { db } from "../sql/db.js";
 import bcrypt from "bcryptjs";
 import "../util/date.util.js";
+import { saveImageService } from "../services/image.services.js";
 
 export async function profile(req, res, next) {
     console.log("profile");
@@ -29,15 +30,14 @@ export async function profile(req, res, next) {
     });
 }
 
-export async function edit(req, res) {
-    console.log("Editing profile");
+export async function edit(req, res, next) {
     const userQuery = await db.query(
         `
         UPDATE user
-        SET username = '${req.body.username}', telephone = '${req.body.telephone}', image = '${req.body.image}', modified_at = '${new Date().toSQLDateTime()}'
-        WHERE id = ${req.body.id};
+        SET username = ?, telephone = ?, modified_at = ?
+        WHERE id = ?;
         `,
-        [],
+        [req.body.username, req.body.telephone, new Date(), req.body.id],
         (error, result) => {
             if(error) {
                 console.log(error);
@@ -46,15 +46,13 @@ export async function edit(req, res) {
         }
     );
 
-    console.log(userQuery);
-
     return res.status(200).json({ 
         message: "success",
         data: req.body
     });
 }
 
-export async function changePassword(req, res) {
+export async function changePassword(req, res, next) {
     console.log("Changing password");
 
     // Get the old password
@@ -107,5 +105,37 @@ export async function changePassword(req, res) {
     return res.status(200).json({
         message: "success",
         data: req.body
+    });
+}
+
+export async function editImage(req, res, next) {
+    saveImageService(req, (error, result) => {
+        if(error) {
+            console.log(error);
+            return next(error.message);
+        }
+
+        // save image url to database
+        const imageQuery = db.query(
+            `
+            UPDATE user
+            SET image = ?
+            WHERE id = ?;
+            `,
+            [result.url, req.query.id],
+            (error, result) => {
+                if(error) {
+                    console.log(error);
+                    return next(error.message);
+                }
+            }
+        );
+
+        return res.status(200).send({
+            message: "success",
+            data: {
+                image: result.url
+            },
+        });
     });
 }

@@ -8,10 +8,11 @@ import cart from "./routes/cart.routes.js";
 import { authenticateToken }from "./middlewares/auth.middlewares.js";
 import { errorHandler } from "./middlewares/error.middlewares.js";
 import dotenv from "dotenv";
-
 import { expressjwt } from "express-jwt";
+import "./services/image.services.js";
 
 const app = express();
+dotenv.config();
 
 app.use(expressjwt({
     secret: process.env.ACCESS_TOKEN_SECRET,
@@ -20,6 +21,7 @@ app.use(expressjwt({
     path: [
         '/login',
         '/register',
+        '/oauth2callback'
     ]
 }));
 
@@ -32,8 +34,12 @@ app.use("/product", product);
 app.use("/order", order);
 app.use("/cart", cart);
 
+app.use("/imagetest", (req, res) => {
+
+});
+
 app.use(errorHandler);
-dotenv.config();
+
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`)
