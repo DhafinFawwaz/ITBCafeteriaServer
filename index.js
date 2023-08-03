@@ -20,7 +20,9 @@ app.use(expressjwt({
 }).unless({
     path: [
         '/login',
+        '/shop/login',
         '/register',
+        '/shop/register',
         '/oauth2callback'
     ]
 }));

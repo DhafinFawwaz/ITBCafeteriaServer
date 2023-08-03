@@ -2,7 +2,8 @@ import express from "express";
 import { profile, edit, changePassword, editImage } from "../controllers/profile.controllers.js";
 import multer from 'multer';
 
-const upload = multer({ dest: './uploads/' })
+const storage = multer.memoryStorage();
+const upload = multer({ storage })
 const router = express.Router();
 
 router.get("/", profile);
