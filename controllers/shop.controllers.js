@@ -34,10 +34,10 @@ export async function edit(req, res) {
     const userQuery = await db.query(
         `
         UPDATE shop
-        SET username = ?, description = ?, telephone = ?, modified_at = ?
+        SET location_id = ?, username = ?, description = ?, telephone = ?, modified_at = ?
         WHERE id = ?;
         `,
-        [req.body.username, req.body.description, req.body.telephone, new Date(), req.body.id],
+        [req.body.location_id, req.body.username, req.body.description, req.body.telephone, new Date(), req.body.id],
         (error, result) => {
             if(error) {
                 console.log(error);
@@ -108,7 +108,7 @@ export async function changePassword(req, res) {
     });
 }
 
-export async function editImage(req, res, next) {
+export async function editImage(req, res, next) { console.log(req.body);
     saveImageService(req, (error, result) => {
         if(error) {
             console.log(error);

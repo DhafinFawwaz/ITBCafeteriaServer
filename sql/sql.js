@@ -44,6 +44,7 @@ export const createLocationTable = `CREATE TABLE location(
 
 export const createShopTable = `CREATE TABLE shop(
     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    location_id TINYINT NOT NULL,
     username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
