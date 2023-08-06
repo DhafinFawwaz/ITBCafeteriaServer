@@ -60,7 +60,7 @@ export async function registerShopService(params, callback) {
     const hashedPassword = await bcrypt.hash(params.password, salt);
 
     const newUser = await db.query(
-        "INSERT INTO shop (username, password, description, email, telephone, location_id, image, created_at, modified_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO shop (username, password, description, email, telephone, location_id, image, created_at, modified_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [params.username, hashedPassword, "", params.email, params.telephone, params.location_id, "", new Date(), new Date()],
         (err, data) => {
             console.log(data);
