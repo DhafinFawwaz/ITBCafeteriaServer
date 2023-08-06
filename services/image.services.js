@@ -1,5 +1,6 @@
 import {v2 as cloudinary} from 'cloudinary';
 import dotenv from "dotenv";
+import streamifier from "streamifier";
 dotenv.config();
           
 cloudinary.config({ 
@@ -9,13 +10,14 @@ cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
 });
 
 export async function saveImageService(req, callback) {
-    cloudinary.uploader.upload(
-        req.file.path,
+    const stream = await cloudinary.uploader.upload_stream(
         { 
-            public_id: req.body.id
+            public_id: req.query.id
         }, 
         (error, result) => {
             return callback(null, result);
         }
     );
+    streamifier.createReadStream(req.file.buffer).pipe(stream);
+    return stream;
 }
