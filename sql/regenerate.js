@@ -25,11 +25,17 @@ async function loadAndSaveData() {
 
         await db.query(dropLocationTable);
 		await db.query(createLocationTable)
+
 		await db.query(
 			"INSERT INTO location (name, description, created_at, modified_at, deleted_at) VALUES ?", 
 			[[
 				['GKUB', 'Kantin di GKUB', new Date(), new Date(), null],
 				['GKUT', 'Kantin di GKUT', new Date(), new Date(), null],
+				['Depan', 'Kantin di Depan ITB', new Date(), new Date(), null],
+				['Borju', 'Kantin di Labtek V', new Date(), new Date(), null],
+				['SBM', 'Kantin di SBM', new Date(), new Date(), null],
+				['CRCS', 'Kantin di CRCS', new Date(), new Date(), null],
+				['Saraga', 'Kantin di Saraga', new Date(), new Date(), null],
 			]], 
 			(err) => {
 			if (err) throw err;

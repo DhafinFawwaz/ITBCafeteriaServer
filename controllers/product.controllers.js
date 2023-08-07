@@ -1,5 +1,6 @@
 import { db } from "../sql/db.js";
 import { saveImageService } from "../services/image.services.js";
+import { getRandomInt } from "../util/random.util.js";
 
 export async function addProduct(req, res) {
 
@@ -223,4 +224,60 @@ export async function editImage(req, res, next) {
             },
         });
     });
+}
+
+export async function suggestedProductByLocation(req, res) {
+
+    const locationId = req.query.location_id;
+    const categoryId = req.query.category_id;
+    const shopLimit = 6;
+    const productLimit = 3;
+    
+    
+    const suggestedProductQuery = await db.query(
+    // select only the shop id where location_id = locationId
+    // get only 6 random shop
+    // get 3 random product in every shop
+    // the array of product will be nested in shop as products
+        `
+        SELECT
+        s.id AS shop_id,
+        s.location_id,
+        s.username,
+        s.email,
+        s.telephone,
+        s.image AS shop_image,
+        s.description AS shop_description,
+        (
+            SELECT JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    'product_id', p.id,
+                    'category_id', p.category_id,
+                    'name', p.name,
+                    'description', p.description,
+                    'price', p.price,
+                    'quantity', p.quantity,
+                    'image', p.image
+                )
+            ) AS products
+            FROM (SELECT * FROM product WHERE product.shop_id = s.id AND product.category_id = ? ORDER BY RAND() LIMIT ?) p
+        ) AS product_array
+    FROM (SELECT * FROM shop WHERE location_id = ? ORDER BY RAND() LIMIT ?) s
+    HAVING product_array IS NOT NULL;
+        `,
+        [categoryId, productLimit, locationId, shopLimit],
+        (error, result) => {
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+    );
+
+
+    res.status(200).json({
+        message: "success",
+        data: suggestedProductQuery[0]
+    });
+
 }
