@@ -200,13 +200,14 @@ export async function editPaymentStatus(req, res) {
 
 export async function payCart(req, res) {
     // change status
+    console.log(`${req.query.user_id} paid some carts`);
     const editCartStatusQuery = await db.query(
         `
         UPDATE cart
         SET cart_status_id = ?, payment_status_id = ?, modified_at = ?
-        WHERE id = ?
+        WHERE cart_status_id = 1 AND user_id = ?
         `,
-        [2, 2, new Date(), req.body.id],
+        [2, 2, new Date(), req.query.user_id],
         (error, result) => {
             if(error) {
                 console.log(error);

@@ -24,7 +24,7 @@ export async function addOrder(req, res) {
         }
     );
 
-    if(checkCartQuery[0][0] == undefined) {
+    if(checkCartQuery[0][0] == undefined) { console.log("checkCartQuery[0][0] == undefined");
         const addCartQuery = await db.query(
             "INSERT INTO cart (user_id, shop_id, payment_method_id, payment_status_id, cart_status_id, pickup_at, total_price, note, created_at, modified_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
             [req.body.user_id, req.body.shop_id, 1, 1, 1, new Date().getAutoPickUpTime(), 0, "", new Date(), new Date()],
@@ -37,7 +37,7 @@ export async function addOrder(req, res) {
         );
         req.body.cart_id = addCartQuery[0].insertId;
     }
-    else {
+    else {console.log("checkCartQuery[0][0] == defined");
         req.body.cart_id = checkCartQuery[0][0].id;
     }
 
@@ -61,7 +61,7 @@ export async function addOrder(req, res) {
         }
     );
 
-    if(checkOrderQuery[0][0] == undefined) {
+    if(checkOrderQuery[0][0] == undefined) { console.log("checkOrderQuery[0][0] == undefined");
         const addOrderQuery = await db.query(
             "INSERT INTO order_item (product_id, cart_id, quantity, created_at, modified_at) VALUES (?, ?, ?, ?, ?)",
             [req.body.product_id, req.body.cart_id, 1, new Date(), new Date()],
@@ -72,7 +72,7 @@ export async function addOrder(req, res) {
                 }
             }
         );
-    } else {
+    } else {console.log("checkOrderQuery[0][0] == defined"); console.log(checkOrderQuery[0][0].id);
         const editOrderQuery = await db.query(
             `
             UPDATE order_item
