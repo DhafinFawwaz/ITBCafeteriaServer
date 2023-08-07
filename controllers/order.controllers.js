@@ -130,6 +130,183 @@ export async function addOrder(req, res) {
     });
 }
 
+export async function reduceOrder(req, res) {
+
+    // check if order with id exist
+    // if exist, then retude order by 1.
+    // if only 1, then delete the order_item
+    // if not exist, then do nothing
+
+
+    const checkOrderQuery = await db.query(
+        `
+        SELECT id, quantity
+        FROM order_item
+        WHERE id = ?
+        LIMIT 1
+        `,
+        [req.query.product_id],
+        (error, result) => {
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+    );
+
+    if(checkOrderQuery[0][0] == undefined) {
+        
+    } else if(checkOrderQuery[0][0].quantity == 1) {
+        const deleteOrderQuery = await db.query(
+            `
+            DELETE FROM order_item
+            WHERE id = ?
+            `,
+            [req.query.product_id],
+            (error, result) => {
+                if(error) {
+                    console.log(error);
+                    return next(error.message);
+                }
+            }
+        );
+    } else {
+        const reduceOrderQuery = await db.query(
+            `
+            UPDATE order_item
+            SET quantity = ?, modified_at = ?
+            WHERE id = ?
+            `,
+            [checkOrderQuery[0][0].quantity - 1, new Date(), req.query.product_id],
+            (error, result) => {
+                if(error) {
+                    console.log(error);
+                    return next(error.message);
+                }
+            }
+        );
+    }
+
+    // Find total_price of cart
+    const findTotalPriceQuery = await db.query(
+        `
+        SELECT SUM(product.price * order_item.quantity) AS total_price
+        FROM order_item
+        INNER JOIN product ON order_item.product_id = product.id
+        WHERE order_item.cart_id = ?
+        `,
+        [req.body.cart_id],
+        (error, result) => {
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+    );
+
+    req.body.total_price = findTotalPriceQuery[0][0].total_price;
+
+    // Update total_price in cart
+    const updateTotalPriceQuery = await db.query(
+        `
+        UPDATE cart
+        SET total_price = ?, modified_at = ?
+        WHERE id = ?
+        `,
+        [req.body.total_price, new Date(), req.body.cart_id],
+        (error, result) => {
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+    );
+
+    res.status(200).json({
+        message: "success",
+        data: req.body
+    });
+}
+export async function addOrderById(req, res) {
+
+    // check if order with id exist
+    // if exist, then retude order by 1.
+    // if only 1, then delete the order_item
+    // if not exist, then do nothing
+
+    const checkOrderQuery = await db.query(
+        `
+        SELECT id, quantity
+        FROM order_item
+        WHERE id = ?
+        LIMIT 1
+        `,
+        [req.query.product_id],
+        (error, result) => {
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+    );
+
+
+    const addOrderQuery = await db.query(
+        `
+        UPDATE order_item
+        SET quantity = quantity+1, modified_at = ?
+        WHERE id = ?
+        `,
+        [new Date(), req.query.product_id],
+        (error, result) => {
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+    );
+
+    // Find total_price of cart
+    const findTotalPriceQuery = await db.query(
+        `
+        SELECT SUM(product.price * order_item.quantity) AS total_price
+        FROM order_item
+        INNER JOIN product ON order_item.product_id = product.id
+        WHERE order_item.cart_id = ?
+        `,
+        [req.body.cart_id],
+        (error, result) => {
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+    );
+
+    req.body.total_price = findTotalPriceQuery[0][0].total_price;
+
+    // Update total_price in cart
+    const updateTotalPriceQuery = await db.query(
+        `
+        UPDATE cart
+        SET total_price = ?, modified_at = ?
+        WHERE id = ?
+        `,
+        [req.body.total_price, new Date(), req.body.cart_id],
+        (error, result) => {
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+    );
+
+    res.status(200).json({
+        message: "success",
+        data: req.body
+    });
+}
+
 export async function editOrder(req, res) {
 
     if(req.body.quantity < 1) {

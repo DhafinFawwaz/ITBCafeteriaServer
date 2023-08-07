@@ -80,6 +80,7 @@ async function loadAndSaveData() {
 				['On Hold', 'Pesanan masih dalam keranjang.', new Date(), new Date(), null],
 				['In Progress', 'Pesanan sedang dibuat, mohon ditunggu', new Date(), new Date(), null],
 				['Finished', 'Pesanan telah selesai. Silahkan diambil', new Date(), new Date(), null],
+				['History', 'Pesanan telah selesai. Silahkan diambil', new Date(), new Date(), null],
 			]], 
 			(err) => {
 			if (err) throw err;

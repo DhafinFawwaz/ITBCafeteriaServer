@@ -74,10 +74,69 @@ export async function deleteCart(req, res) {
 
 export async function getAllCart(req, res) {
     // Get all cart that is On Hold
+    // get all order item with cart_id = cart.id
+    // get all product with id = order_item.product_id
+    // get all shop with id = cart.shop_id
+
+    // result will be
+    /*
+    {[
+        {
+            user_id: 1,
+            shop_id: 1,
+            shop_name: "shop_name",
+            shop_image: "shop_image",
+            payment_method_id: 1,
+            payment_status_id: 1,
+            cart_status_id: 1,
+            pickup_at: "2021-01-01 00:00:00",
+            total_price: 0,
+            note: "note",
+            order_item: [
+                {
+                    product_id: 1,
+                    cart_id: 1,
+                    quantity: 1,
+                    product_name: "product_name",
+                    product_price: 0,
+                    product_image: "product_image"
+                }
+            ]
+        }
+        
+    ]}
+    */
+
     const getAllCartQuery = await db.query(
         `
-        SELECT * FROM cart
-        WHERE user_id = ? AND cart_status_id = 1
+        SELECT
+            c.user_id,
+            c.shop_id,
+            s.username AS shop_name,
+            s.image AS shop_image,
+            c.payment_method_id,
+            c.payment_status_id,
+            c.cart_status_id,
+            c.pickup_at,
+            c.total_price,
+            c.note,
+            JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    'order_item_id', oi.id, 
+                    'product_id', p.id,
+                    'cart_id', oi.cart_id,
+                    'quantity', oi.quantity,
+                    'product_name', p.name,
+                    'product_price', p.price,
+                    'product_image', p.image
+                )
+            ) AS order_item
+        FROM cart c
+        JOIN shop s ON c.shop_id = s.id
+        JOIN order_item oi ON c.id = oi.cart_id
+        JOIN product p ON oi.product_id = p.id
+        WHERE c.cart_status_id = 1 AND c.user_id = ?
+        GROUP BY c.id;
         `, 
         [req.query.user_id],
         (error, result) => {
