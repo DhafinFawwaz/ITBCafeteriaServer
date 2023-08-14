@@ -5,32 +5,36 @@ import { getRandomInt } from "../util/random.util.js";
 export async function addProduct(req, res) {
 
     // Save the image in separate database
-    req.body.id = addProductQuery[0].insertId;
-    saveImageService(req, (error, result) => {
+    req.query.id = req.body.shop_id;
+    req.body.shop_id = parseInt(req.body.shop_id);
+    req.body.location_id = parseInt(req.body.location_id);
+    req.body.category_id = parseInt(req.body.category_id);
+    req.body.price = parseFloat(req.body.price);
+    req.body.quantity = parseInt(req.body.quantity);
+    
+    await saveImageService(req, async (error, result) => {
         if(error) {
             console.log(error);
             return next(error.message);
         }
-
         req.body.image = result.url;
-    });
 
-
-    const addProductQuery = await db.query(
-        "INSERT INTO product (shop_id, location_id, category_id, name, description, price, quantity, image, created_at, modified_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [req.body.shop_id, req.body.location_id, req.body.category_id, req.body.name, req.body.description, req.body.price, req.body.quantity, req.body.image, new Date(), new Date(), null],
-        (error, result) => {
-            if(error) {
-                console.log(error);
-                return next(error.message);
+        const addProductQuery = await db.query(
+            "INSERT INTO product (shop_id, location_id, category_id, name, description, price, quantity, image, created_at, modified_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [req.body.shop_id, req.body.location_id, req.body.category_id, req.body.name, req.body.description, req.body.price, req.body.quantity, req.body.image, new Date(), new Date(), null],
+            (error, result) => {
+                if(error) {
+                    console.log(error);
+                    return next(error.message);
+                }
             }
-        }
-    );
+        );
 
 
-    res.status(200).json({
-        message: "Product added successfully",
-        data: req.body
+        res.status(200).json({
+            message: "success",
+            data: req.body
+        });
     });
 }
 
@@ -280,4 +284,49 @@ export async function suggestedProductByLocation(req, res) {
         data: suggestedProductQuery[0]
     });
 
+}
+
+export async function getOwnedproduct(req, res) {
+
+    const ownedProductQuery = await db.query(
+        `
+        SELECT * FROM product WHERE shop_id = ?
+        `,
+        [req.query.shop_id],
+        (error, result) => {
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+
+    );
+    
+
+    res.status(200).json({
+        message: "success",
+        data: ownedProductQuery[0]
+    });
+
+}
+
+export async function getCartOrder(req, res) {
+    const cartOrderQuery = await db.query(
+        `
+        SELECT * FROM cart_order WHERE user_id = ?
+        `,
+        [req.query.user_id],
+        (error, result) => {
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+    );
+
+    res.status(200).json({
+        message: "success",
+        data: cartOrderQuery[0]
+    });
+    
 }

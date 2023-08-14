@@ -72,6 +72,7 @@ export async function registerShopService(params, callback) {
 
     return callback(null, {
         id: newUser[0].insertId,
+        location_id: params.location_id,
         username: params.username,
         password: params.password,
         email: params.email,

@@ -12,7 +12,7 @@ cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
 export async function saveImageService(req, callback) {
     const stream = await cloudinary.uploader.upload_stream(
         { 
-            public_id: req.query.id
+            
         }, 
         (error, result) => {
             return callback(null, result);

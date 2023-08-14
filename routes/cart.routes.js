@@ -1,9 +1,10 @@
 import express from "express";
-import { addCart, editCart, editCartStatus, editPaymentStatus, deleteCart, getAllCart, payCart } from "../controllers/cart.controllers.js";
+import { addCart, editCart, editCartStatus, editPaymentStatus, deleteCart, getAllCart, getOnHoldCart, payCart } from "../controllers/cart.controllers.js";
 
 const router = express.Router();
 
 router.get("/", getAllCart);
+router.get("/shop", getOnHoldCart);
 // router.post("/add", addCart);
 router.post("/edit", editCart);
 router.post("/pay", payCart);

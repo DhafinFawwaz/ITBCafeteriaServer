@@ -49,7 +49,7 @@ export async function addOrder(req, res) {
         `
         SELECT id, quantity
         FROM order_item
-        WHERE product_id = ? AND cart_id = ?
+        WHERE product_id = ? AND cart_id = ? AND cart_status_id = 1
         LIMIT 1
         `,
         [req.body.product_id, req.body.cart_id],
@@ -63,8 +63,8 @@ export async function addOrder(req, res) {
 
     if(checkOrderQuery[0][0] == undefined) { console.log("checkOrderQuery[0][0] == undefined");
         const addOrderQuery = await db.query(
-            "INSERT INTO order_item (product_id, cart_id, quantity, created_at, modified_at) VALUES (?, ?, ?, ?, ?)",
-            [req.body.product_id, req.body.cart_id, 1, new Date(), new Date()],
+            "INSERT INTO order_item (product_id, cart_id, cart_status_id, quantity, created_at, modified_at) VALUES (?, ?, ?, ?, ?, ?)",
+            [req.body.product_id, req.body.cart_id, 1, 1, new Date(), new Date()],
             (error, result) => {
                 if(error) {
                     console.log(error);
@@ -140,12 +140,27 @@ export async function reduceOrder(req, res) {
 
     const checkOrderQuery = await db.query(
         `
-        SELECT id, quantity
+        UPDATE order_item
+        SET quantity = quantity-1, modified_at = ?
+        WHERE id = ?
+        `,
+        [new Date(), req.query.order_id],
+        (error, result) => {
+            
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+    );
+
+    const cartIdQuery = await db.query(
+        `
+        SELECT cart_id
         FROM order_item
         WHERE id = ?
-        LIMIT 1
         `,
-        [req.query.product_id],
+        [req.query.order_id],
         (error, result) => {
             if(error) {
                 console.log(error);
@@ -154,38 +169,22 @@ export async function reduceOrder(req, res) {
         }
     );
 
-    if(checkOrderQuery[0][0] == undefined) {
-        
-    } else if(checkOrderQuery[0][0].quantity == 1) {
-        const deleteOrderQuery = await db.query(
-            `
-            DELETE FROM order_item
-            WHERE id = ?
-            `,
-            [req.query.product_id],
-            (error, result) => {
-                if(error) {
-                    console.log(error);
-                    return next(error.message);
-                }
+    req.body.cart_id = cartIdQuery[0][0].cart_id;
+
+    const deleteZeroOrderQuery = await db.query(
+        `
+        DELETE from order_item
+        WHERE id = ? AND quantity = 0
+        `,
+        [req.query.order_id],
+        (error, result) => {
+            
+            if(error) {
+                console.log(error);
+                return next(error.message);
             }
-        );
-    } else {
-        const reduceOrderQuery = await db.query(
-            `
-            UPDATE order_item
-            SET quantity = ?, modified_at = ?
-            WHERE id = ?
-            `,
-            [checkOrderQuery[0][0].quantity - 1, new Date(), req.query.product_id],
-            (error, result) => {
-                if(error) {
-                    console.log(error);
-                    return next(error.message);
-                }
-            }
-        );
-    }
+        }
+    );
 
     // Find total_price of cart
     const findTotalPriceQuery = await db.query(
@@ -236,28 +235,11 @@ export async function addOrderById(req, res) {
 
     const checkOrderQuery = await db.query(
         `
-        SELECT id, quantity
-        FROM order_item
-        WHERE id = ?
-        LIMIT 1
-        `,
-        [req.query.product_id],
-        (error, result) => {
-            if(error) {
-                console.log(error);
-                return next(error.message);
-            }
-        }
-    );
-
-
-    const addOrderQuery = await db.query(
-        `
         UPDATE order_item
         SET quantity = quantity+1, modified_at = ?
         WHERE id = ?
         `,
-        [new Date(), req.query.product_id],
+        [new Date(), req.query.order_id],
         (error, result) => {
             if(error) {
                 console.log(error);
@@ -265,6 +247,23 @@ export async function addOrderById(req, res) {
             }
         }
     );
+
+    const cartIdQuery = await db.query(
+        `
+        SELECT cart_id
+        FROM order_item
+        WHERE id = ?
+        `,
+        [req.query.order_id],
+        (error, result) => {
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+    );
+
+    req.body.cart_id = cartIdQuery[0][0].cart_id;
 
     // Find total_price of cart
     const findTotalPriceQuery = await db.query(
@@ -284,7 +283,6 @@ export async function addOrderById(req, res) {
     );
 
     req.body.total_price = findTotalPriceQuery[0][0].total_price;
-
     // Update total_price in cart
     const updateTotalPriceQuery = await db.query(
         `

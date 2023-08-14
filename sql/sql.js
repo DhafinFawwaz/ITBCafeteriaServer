@@ -97,6 +97,7 @@ export const createOrderItemTable = `CREATE TABLE order_item(
     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
     cart_id INT NOT NULL,
+    cart_status_id TINYINT NOT NULL,
     quantity INT NOT NULL,
     created_at DATETIME NOT NULL,
     modified_at DATETIME NOT NULL

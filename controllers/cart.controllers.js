@@ -154,6 +154,56 @@ export async function getAllCart(req, res) {
 
 }
 
+export async function getOnHoldCart(req, res) {
+
+    const getAllCartQuery = await db.query(
+        `
+        SELECT
+            c.id,
+            c.user_id,
+            c.shop_id,
+            s.username AS shop_name,
+            s.image AS shop_image,
+            c.payment_method_id,
+            c.payment_status_id,
+            c.cart_status_id,
+            c.pickup_at,
+            c.total_price,
+            c.note,
+            JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    'order_item_id', oi.id, 
+                    'product_id', p.id,
+                    'cart_id', oi.cart_id,
+                    'quantity', oi.quantity,
+                    'product_name', p.name,
+                    'product_price', p.price,
+                    'product_image', p.image
+                )
+            ) AS order_item
+        FROM cart c
+        JOIN shop s ON c.shop_id = s.id
+        JOIN order_item oi ON c.id = oi.cart_id
+        JOIN product p ON oi.product_id = p.id
+        WHERE (c.cart_status_id = 2 OR c.cart_status_id = 3) AND c.shop_id = ?
+        GROUP BY c.id;
+        `, 
+        [req.query.shop_id],
+        (error, result) => {
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+    );
+
+    res.status(200).json({
+        message: "success",
+        data: getAllCartQuery[0]
+    });
+
+}
+
 export async function editCartStatus(req, res) {
     const editCartStatusQuery = await db.query(
         `
@@ -169,6 +219,22 @@ export async function editCartStatus(req, res) {
             }
         }
     );
+
+    const editOrderItemStatusQuery = await db.query(
+        `
+        UPDATE order_item
+        SET cart_status_id = ?, modified_at = ?
+        WHERE cart_id = ?
+        `,
+        [req.body.cart_status_id, new Date(), req.body.id],
+        (error, result) => {
+            if(error) {
+                console.log(error);
+                return next(error.message);
+            }
+        }
+    );
+
 
     res.status(200).json({
         message: "success",
